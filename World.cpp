@@ -2,6 +2,9 @@
 #include "Painter.hpp"
 #include <fstream>
 
+std::ifstream& operator >> (std::ifstream &stream, Point &variable);
+std::ifstream& operator >> (std::ifstream &stream, Velocity &variable);
+std::ifstream& operator >> (std::ifstream &stream, Color &variable);
 // Длительность одного тика симуляции.
 // Подробнее см. update()
 // Изменять не следует
@@ -32,33 +35,16 @@ World::World(const std::string& worldFilePath) {
      * как и (red, green, blue). Опять же, можно упростить
      * этот код, научившись читать сразу Point, Color...
      */
-    double x;
-    double y;
-    double vx;
-    double vy;
+    Velocity vel;
+    Point cen;
+    Color col;
     double radius;
-
-    double red;
-    double green;
-    double blue;
-
     bool isCollidable;
 
     // Здесь не хватает обработки ошибок, но на текущем
     // уровне прохождения курса нас это устраивает
     while (stream.peek(), stream.good()) {
-        // Читаем координаты центра шара (x, y) и вектор
-        // его скорости (vx, vy)
-        stream >> x >> y >> vx >> vy;
-        // Читаем три составляющие цвета шара
-        stream >> red >> green >> blue;
-        // Читаем радиус шара
-        stream >> radius;
-        // Читаем свойство шара isCollidable, которое
-        // указывает, требуется ли обрабатывать пересечение
-        // шаров как столкновение. Если true - требуется.
-        // В базовой части задания этот параметр
-        stream >> std::boolalpha >> isCollidable;
+        stream >> cen >> vel >> col >> radius >> std::boolalpha >> isCollidable;
 
         // TODO: место для доработки.
         // Здесь не хватает самого главного - создания
@@ -69,10 +55,7 @@ World::World(const std::string& worldFilePath) {
         // сконструируем объект Ball ball;
         // добавьте его в конец контейнера вызовом
         // balls.push_back(ball);
-        Velocity velocity(vx, vy);
-        Point centre(x,y);
-        Color color(red, green, blue);
-        Ball b(velocity, centre,color, radius);
+        Ball b(vel, cen,col, radius);
         balls.push_back(b);
     }
 }
@@ -112,4 +95,23 @@ void World::update(double time) {
     restTime = time - double(ticks) * timePerTick;
 
     physics.update(balls, ticks);
+}
+
+std::ifstream& operator >> (std::ifstream &stream, Point &variable){
+    stream >> variable.x >> variable.y;
+    return stream;
+}
+std::ifstream& operator >> (std::ifstream &stream, Velocity &variable){
+    Point p;
+    stream >> p.x >> p.y;
+    variable.setVector(p);
+    return stream;
+}
+std::ifstream& operator >> (std::ifstream &stream, Color &variable){
+    double r,g,b;
+    stream >> r >> g >> b;
+    variable.set_red(r);
+    variable.set_green(g);
+    variable.set_blue(b);
+    return stream;
 }

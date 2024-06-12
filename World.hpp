@@ -3,6 +3,8 @@
 #include "Physics.hpp"
 #include <string>
 #include <vector>
+#include "iostream"
+#include "fstream"
 
 class Painter;
 
